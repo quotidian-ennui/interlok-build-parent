@@ -1,0 +1,4 @@
+.gradle
+builder.xml
+/build/
+/test/build/

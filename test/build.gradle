@@ -1,0 +1,28 @@
+ext {
+
+  interlokParentBaseUrl = 'file:///' + project.projectDir.getParentFile().getAbsolutePath()
+  interlokParentGradle = interlokParentBaseUrl + '/build.gradle'
+  buildEnv = project.hasProperty('buildEnv') ? project.getProperty('buildEnv') : 'env'
+  // includeWar = 'true'
+  interlokVerifyEnvironmentProperties = [
+    "VALUE_IN_ENV" : "value3"
+  ]
+
+  interlokVerifySystemProperties = [
+    "valueSystemProperty" : "value4"
+  ]
+
+}
+
+allprojects {
+  apply from: "${interlokParentGradle}"
+}
+
+dependencies {
+  interlokRuntime ("com.adaptris:interlok-json:$interlokVersion")
+}
+// works around an issue with dependency-check-gradle:8.0.1 where groovy
+// add to a list doesn't "coerce $rootDir" into a string at the right time.
+dependencyCheck.suppressionFiles.add("$rootDir/../owasp-exclude.xml".toString())
+
+installDist.dependsOn check
