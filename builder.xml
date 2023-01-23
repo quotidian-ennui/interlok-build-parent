@@ -1,0 +1,135 @@
+<!-- Allows me to compile interlok and do stuffs.-->
+<project>
+
+  <target name="ant-initialiser">
+    <condition property="build.interlok.core" else="false">
+      <and>
+        <isset property="interlok.checkout.dir"/>
+        <not>
+          <equals arg1="${interlok.checkout.dir}" arg2="unset" trim="true"/>
+        </not>
+      </and>
+    </condition>
+    <condition property="build.interlok.core.javadoc" else="false">
+      <and>
+        <isset property="interlok.checkout.dir"/>
+        <isset property="target.javadoc.dir"/>
+        <not>
+          <equals arg1="${interlok.checkout.dir}" arg2="unset" trim="true"/>
+        </not>
+      </and>
+    </condition>
+    <condition property="build.interlok.optional" else="false">
+      <and>
+        <isset property="interlok.optional.dir"/>
+        <not>
+          <equals arg1="${interlok.optional.dir}" arg2="unset" trim="true"/>
+        </not>
+      </and>
+    </condition>
+    <condition property="build.interlok.optional.javadoc" else="false">
+      <and>
+        <isset property="interlok.optional.dir"/>
+        <isset property="target.javadoc.dir"/>
+        <not>
+          <equals arg1="${interlok.optional.dir}" arg2="unset" trim="true"/>
+        </not>
+      </and>
+    </condition>
+    <echo message="build.interlok.core=${build.interlok.core}"/>
+    <echo message="build.interlok.core.javadoc=${build.interlok.core.javadoc}"/>
+    <echo message="build.interlok.optional=${build.interlok.optional}"/>
+    <echo message="build.interlok.optional.javadoc=${build.interlok.optional.javadoc}"/>
+  </target>
+
+  <target name="build-latest" depends="ant-initialiser,assemble,latest-interlok,latest-optional" description="Build a checked-out interlok codebase"/>
+
+  <target name="build-interlok" depends="build-latest" description="alias for build-latest"/>
+
+  <target name="latest-interlok" depends="compile-interlok,copy-interlok-jars,copy-interlok-javadocs"/>
+
+  <target name="latest-optional" depends="compile-optional,copy-optional-jars,copy-optional-javadocs"/>
+
+  <target name="compile-interlok" if="${build.interlok.core}">
+    <exec executable="cmd" dir="${interlok.checkout.dir}" osfamily="windows">
+      <arg value="/c"/>
+      <arg value="gradlew.bat"/>
+      <arg value="-Dorg.gradle.console=plain"/>
+      <arg value="jar"/>
+      <arg value="javadocJar"/>
+    </exec>
+    <exec executable="gradlew" dir="${interlok.checkout.dir}" osfamily="unix" resolveexecutable="true">
+      <arg value="-Dorg.gradle.console=plain"/>
+      <arg value="jar"/>
+      <arg value="javadocJar"/>
+    </exec>
+  </target>
+
+  <target name="copy-interlok-jars" depends="compile-interlok" if="${build.interlok.core}">
+    <copy enablemultiplemappings="true" todir="${target.dir}" overwrite="true" verbose="true">
+      <fileset dir="${interlok.checkout.dir}">
+        <include name="**/*.jar"/>
+        <exclude name="**/gradle-wrapper.jar"/>
+        <exclude name="**/build/tmp/**/*.jar"/>
+        <exclude name="**/*javadoc.jar"/>
+      </fileset>
+      <compositemapper>
+        <regexpmapper handledirsep="true" from="^.*build/libs/(.*)-${interlok.version}\.jar$$" to="\1.jar"/>
+      </compositemapper>
+    </copy>
+  </target>
+
+  <target name="copy-interlok-javadocs" depends="compile-interlok" if="${build.interlok.core.javadoc}">
+    <copy enablemultiplemappings="true" todir="${target.javadoc.dir}" overwrite="true" verbose="true">
+      <fileset dir="${interlok.checkout.dir}">
+        <include name="**/*javadoc.jar"/>
+      </fileset>
+      <compositemapper>
+        <regexpmapper handledirsep="true" from="^.*build/libs/(.*)-${interlok.version}-javadoc\.jar$$" to="\1.jar"/>
+      </compositemapper>
+    </copy>
+  </target>
+
+
+  <target name="compile-optional" if="${build.interlok.optional}">
+    <exec executable="cmd" dir="${interlok.optional.dir}" osfamily="windows">
+      <arg value="/c"/>
+      <arg value="gradlew.bat"/>
+      <arg value="-Dorg.gradle.console=plain"/>
+      <arg value="jar"/>
+      <arg value="javadocJar"/>
+    </exec>
+    <exec executable="gradlew" dir="${interlok.optional.dir}" osfamily="unix" resolveexecutable="true">
+      <arg value="-Dorg.gradle.console=plain"/>
+      <arg value="jar"/>
+      <arg value="javadocJar"/>
+    </exec>
+  </target>
+
+  <target name="copy-optional-jars" depends="compile-optional" if="${build.interlok.optional}">
+    <copy enablemultiplemappings="true" todir="${target.dir}" overwrite="true" verbose="true">
+      <fileset dir="${interlok.optional.dir}">
+        <include name="**/*.jar"/>
+        <exclude name="**/gradle-wrapper.jar"/>
+        <exclude name="**/build/tmp/**/*.jar"/>
+        <exclude name="**/*javadoc.jar"/>
+      </fileset>
+      <compositemapper>
+        <regexpmapper handledirsep="true" from="^.*build/libs/(.*)-${interlok.version}\.jar$$" to="\1.jar"/>
+      </compositemapper>
+    </copy>
+  </target>
+
+  <target name="copy-optional-javadocs" depends="compile-optional" if="${build.interlok.optional.javadoc}">
+    <copy enablemultiplemappings="true" todir="${target.javadoc.dir}" overwrite="true" verbose="true">
+      <fileset dir="${interlok.optional.dir}">
+        <include name="**/*javadoc.jar"/>
+      </fileset>
+      <compositemapper>
+        <regexpmapper handledirsep="true" from="^.*build/libs/(.*)-${interlok.version}-javadoc\.jar$$" to="\1.jar"/>
+      </compositemapper>
+    </copy>
+  </target>
+
+
+</project>
