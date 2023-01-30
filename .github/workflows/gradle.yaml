@@ -54,9 +54,14 @@ jobs:
         github-token: ${{ github.token }}
         state: open
         sha: ${{ github.event.pull_request.head.sha || github.event.workflow_run.head_sha || github.sha }}
+    - name: grab dependabot metadata
+      id: depbot-metadata
+      uses: dependabot/fetch-metadata@v1
+      with:
+        github-token: ${{ github.token }}
     - name: merge-if-built
-      continue-on-error: true
       uses: fastify/github-action-merge-dependabot@v3
+      if: ${{ steps.depbot-metadata.outputs.update-type }} == 'version-update:semver-patch'
       with:
         pr-number: ${{ steps.findpr.outputs.pr }}
         target: patch
