@@ -23,6 +23,6 @@ dependencies {
 }
 // works around an issue with dependency-check-gradle:8.0.1 where groovy
 // add to a list doesn't "coerce $rootDir" into a string at the right time.
-dependencyCheck.suppressionFiles.add("$rootDir/../owasp-exclude.xml".toString())
+dependencyCheck.suppressionFiles.add("$rootDir/../owasp-exclude.xml")
 
 installDist.dependsOn check
