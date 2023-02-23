@@ -57,6 +57,7 @@ jobs:
     - name: grab dependabot metadata
       id: depbot-metadata
       uses: dependabot/fetch-metadata@v1
+      continue-on-error: true
       with:
         github-token: ${{ github.token }}
     - name: merge-if-built
