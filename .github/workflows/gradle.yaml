@@ -6,11 +6,15 @@ on:
       - main
     paths-ignore:
       - "README.md"
+      - ".github/dependabot.yml"
+      - ".github/workflows/owasp.yml"
   pull_request:
     branches:
       - main
     paths-ignore:
       - "README.md"
+      - ".github/dependabot.yml"
+      - ".github/workflows/owasp.yml"
   schedule:
     - cron: '15 01 * * SUN'
 
@@ -25,18 +29,14 @@ jobs:
       with:
         java-version: 11
         distribution: 'temurin'
-    - name: Setup Gradle
-      uses: gradle/gradle-build-action@v2
-      with:
-        gradle-version: current
-        gradle-home-cache-excludes: dependency-check-data
     - name: Gradle Check
+      uses: gradle/gradle-build-action@v2
       env:
         JAVA_TOOL_OPTIONS: -Dpolyglot.js.nashorn-compat=true -Dpolyglot.engine.WarnInterpreterOnly=false
-        INTERLOK_PARENT_VERSION: ${{ matrix.interlok-version }}
-      run: |
-        cd ./test
-        gradle check
+      with:
+        gradle-version: current
+        arguments: check
+        build-root-directory: test
 
   automerge:
     needs: build

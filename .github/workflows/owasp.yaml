@@ -8,6 +8,8 @@ on:
       - "README.md"
       - "serviceTestLog4j2.xml"
       - "verifyLog4j2.xml"
+      - ".github/dependabot.yml"
+      - ".github/workflows/gradle.yml"
   pull_request:
     branches:
       - main
@@ -15,6 +17,8 @@ on:
       - "README.md"
       - "serviceTestLog4j2.xml"
       - "verifyLog4j2.xml"
+      - ".github/dependabot.yml"
+      - ".github/workflows/gradle.yml"
   schedule:
     - cron: '15 03 * * SUN'
 
@@ -50,8 +54,10 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-dependency-check-data-
     - name: Gradle DependencyCheckAnalyze
+      uses: gradle/gradle-build-action@v2
       env:
         JAVA_TOOL_OPTIONS: -Dpolyglot.js.nashorn-compat=true -Dpolyglot.engine.WarnInterpreterOnly=false
-      run: |
-        cd ./test
-        gradle dependencyCheckAnalyze
+      with:
+        gradle-version: current
+        arguments: dependencyCheckAnalyze
+        build-root-directory: test
