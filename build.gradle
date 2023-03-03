@@ -21,6 +21,7 @@ ext {
   jakartaJmsSubstitution='jakarta.jms:jakarta.jms-api:2.0.3'
   jakartaActivationSubstitution='com.sun.activation:jakarta.activation:1.2.2'
   jakartaMailSubstitution='com.sun.mail:jakarta.mail:1.6.7'
+  jakartaExpressionSubstitution='org.glassfish:jakarta.el:3.0.4'
   bouncyCastleSubsitutionVersion='1.72'
 
   // Make semi-required optional components have an explicit version
@@ -219,6 +220,7 @@ configurations.all {
   resolutionStrategy.dependencySubstitution {
     substitute module('commons-logging:commons-logging') using module("org.slf4j:slf4j-api:$slf4jVersion")
     substitute module('commons-logging:commons-logging-api') using module("org.slf4j:slf4j-api:$slf4jVersion")
+    substitute module('org.glassfish:javax.el') using module("$jakartaExpressionSubstitution")
 
     // jakarta-activation:jakarta.activation-api is transitive from xml-bind
     // and jackson, which we substitute in favour of the com.sun variant since this
