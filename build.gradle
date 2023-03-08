@@ -298,6 +298,7 @@ dependencies {
   interlokRuntime ("com.adaptris:interlok-rest-health-check:$interlokVersion") { changing=true }
   interlokRuntime group: "com.adaptris", name: "interlok-varsub", version: interlokPatch.helperVersion(), changing: true
 
+  interlokRuntime ("org.apache.activemq:activemq-client:5.17.3")
   interlokRuntime ("org.slf4j:slf4j-api:$slf4jVersion")
   interlokRuntime ("org.slf4j:jcl-over-slf4j:$slf4jVersion")
   interlokRuntime ("org.slf4j:jul-to-slf4j:$slf4jVersion")

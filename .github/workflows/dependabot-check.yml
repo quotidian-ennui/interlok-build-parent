@@ -1,0 +1,67 @@
+name: dependabot
+on:
+  pull_request:
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# Dependabot doesn't have access to secrets
+# which means the private github package repo isn't
+# accessible via a standard PR github action.
+# https://github.com/dependabot/dependabot-core/issues/3253#issuecomment-852541544
+# This then triggers dependabot-build.yml
+jobs:
+  depbot-repo-dispatch:
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+    runs-on: ubuntu-latest
+    if: ${{ github.actor == 'dependabot[bot]' }}
+    name: Dependabot Workflow Trigger
+    steps:
+    - name: Find associated PR
+      uses: jwalton/gh-find-current-pr@v1
+      id: findpr
+      with:
+        github-token: ${{ github.token }}
+        state: open
+        sha: ${{ github.event.pull_request.head.sha || github.event.workflow_run.head_sha || github.sha }}
+    - name: Grab Dependabot metadata
+      id: depbot-metadata
+      continue-on-error: true
+      uses: dependabot/fetch-metadata@v1
+    - name: Allow merge on semver-patch
+      id: depbot-merge
+      run: |
+        if [ "${{ steps.depbot-metadata.outputs.update-type }}" == "version-update:semver-patch" ]
+        then
+          echo "automerge=yes" >> $GITHUB_OUTPUT
+        else
+          echo "automerge=no" >> $GITHUB_OUTPUT
+        fi
+    - name: Repository Dispatch Event
+      uses: actions/github-script@v6
+      env:
+        evt_payload: |
+          {
+            "branch" : "${{ github.head_ref }}",
+            "sha": "${{ github.event.pull_request.head.sha }}",
+            "pull_request": "${{ steps.findpr.outputs.pr }}",
+            "automerge": "${{ steps.depbot-merge.outputs.automerge }}",
+            "update-type": "${{ steps.depbot-metadata.outputs.update-type }}"
+          }
+        evt_type: "dependabot-build"
+      with:
+        script: |
+          const { evt_payload , evt_type } = process.env
+          console.log(evt_payload)
+          github.rest.repos.createDispatchEvent({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              event_type: evt_type,
+              client_payload: JSON.parse(evt_payload)
+          })

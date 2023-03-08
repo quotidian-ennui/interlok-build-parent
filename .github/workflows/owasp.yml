@@ -1,4 +1,4 @@
-name: OWASP SCA
+name: owasp
 
 on:
   push:
@@ -8,8 +8,6 @@ on:
       - "README.md"
       - "serviceTestLog4j2.xml"
       - "verifyLog4j2.xml"
-      - ".github/dependabot.yml"
-      - ".github/workflows/gradle.yml"
   pull_request:
     branches:
       - main
@@ -17,8 +15,6 @@ on:
       - "README.md"
       - "serviceTestLog4j2.xml"
       - "verifyLog4j2.xml"
-      - ".github/dependabot.yml"
-      - ".github/workflows/gradle.yml"
   schedule:
     - cron: '15 03 * * SUN'
 
@@ -27,7 +23,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
+  owasp:
+    name: OWASP Dependency Check Analyze
     runs-on: ubuntu-latest
     steps:
     - name: Checkout

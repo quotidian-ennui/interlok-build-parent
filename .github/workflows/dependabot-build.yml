@@ -1,0 +1,15 @@
+name: dependabot-build
+on:
+  repository_dispatch:
+    types:
+      - dependabot-build
+
+jobs:
+  build:
+    uses: ./.github/workflows/gradle-check.yml
+    with:
+      target_branch: ${{ github.event.client_payload.branch }}
+      pull_request: ${{ github.event.client_payload.pull_request }}
+      automerge: ${{ github.event.client_payload.automerge }}
+      sha: ${{ github.event.client_payload.sha }}
+      update_type: ${{ github.event.client_payload.update-type }}

@@ -1,0 +1,20 @@
+name: gradle
+
+on:
+  push:
+    branches-ignore:
+      - 'dependabot/**'
+  pull_request:
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  gradle:
+    if: ${{ github.actor != 'dependabot[bot]' }}
+    uses: ./.github/workflows/gradle-check.yml
+    with:
+      target_branch: ${{ github.head_ref }}

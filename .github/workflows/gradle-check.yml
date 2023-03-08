@@ -1,0 +1,212 @@
+name: gradle-check
+
+on:
+  workflow_call:
+    inputs:
+      target_branch:
+        required: true
+        description: 'The branch to checkout and work-on'
+        type: string
+      pull_request:
+        required: false
+        description: 'The Pull Request No.'
+        type: string
+      automerge:
+        required: false
+        description: 'Whether or not to automerge the PR on success'
+        type: string
+      update_type:
+        required: false
+        description: 'Update type associated with dependabot PR'
+        type: string
+      sha:
+        required: false
+        description: 'SHA of the commit'
+        type: string
+
+jobs:
+  bootstrap:
+    name: Pipeline Bootstrap
+    runs-on: ubuntu-latest
+    outputs:
+      status_url: ${{ steps.compute.outputs.status_url }}
+      status_context: ${{ steps.compute.outputs.status_context }}
+      git_sha: ${{ steps.compute.outputs.git_sha }}
+      is_pr: ${{ steps.compute.outputs.is_pr }}
+      is_dependabot_pr: ${{ steps.compute.outputs.is_dependabot_pr }}
+      dependabot_merge: ${{ steps.compute.outputs.dependabot_merge }}
+    steps:
+    - name: Debug
+      uses: hmarr/debug-action@v2
+    - name: Compute Activities
+      id: compute
+      run: |
+        # For attempt at DRY.
+        if [ "${{ inputs.pull_request }}" != "" ]
+        then
+          echo "is_pr=yes"  >> $GITHUB_OUTPUT
+        else
+          echo "is_pr=no"  >> $GITHUB_OUTPUT
+        fi
+        if [[ "${{ inputs.pull_request }}" != "" && "${{ inputs.automerge }}" != "" && "${{ inputs.update_type }}" != "" ]]
+        then
+          echo "is_dependabot_pr=yes"  >> $GITHUB_OUTPUT
+        else
+          echo "is_dependabot_pr=no"  >> $GITHUB_OUTPUT
+        fi
+        if [[ "${{ inputs.pull_request }}" != "" && "${{ inputs.automerge }}" == "yes" && "${{ inputs.update_type }}" != "" ]]
+        then
+          echo "dependabot_merge=yes"  >> $GITHUB_OUTPUT
+        else
+          echo "dependabot_merge=no"  >> $GITHUB_OUTPUT
+        fi
+        echo "status_context=Gradle Check" >> $GITHUB_OUTPUT
+        echo "git_sha=${{ inputs.sha || github.event.pull_request.head.sha || github.event.workflow_run.head_sha || github.sha }}" >> $GITHUB_OUTPUT
+        echo "status_url=https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> $GITHUB_OUTPUT
+    - name: Build Pending
+      uses: actions/github-script@v6
+      with:
+        script: |
+          github.rest.repos.createCommitStatus({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            sha: "${{ steps.compute.outputs.git_sha }}",
+            target_url: "${{ steps.compute.outputs.status_url }}",
+            state: "pending",
+            description: "Build Pending",
+            context: "${{ steps.compute.outputs.status_context }}"
+          })
+
+  gradle:
+    runs-on: ubuntu-latest
+    needs:
+    - bootstrap
+    name: Gradle Check
+    steps:
+    - name: Checkout branch
+      uses: actions/checkout@v3
+      with:
+        ref: ${{ inputs.target_branch }}
+    - name: Set up JDK 11
+      uses: actions/setup-java@v3
+      with:
+        java-version: 11
+        distribution: 'temurin'
+    - name: Execute Gradle Check
+      uses: gradle/gradle-build-action@v2
+      with:
+        gradle-version: current
+        arguments: check
+        build-root-directory: test
+      env:
+        JAVA_TOOL_OPTIONS: -Dpolyglot.js.nashorn-compat=true -Dpolyglot.engine.WarnInterpreterOnly=false
+        ADX_REPO_USER: ${{ secrets.ADX_REPO_USER }}
+        ADX_REPO_PASSWORD: ${{ secrets.ADX_REPO_PASSWORD }}
+    - name: Gradle Build Reports
+      uses: actions/upload-artifact@v3
+      with:
+        name: build-reports
+        path: |
+          **/build/reports
+    - name: Workflow Failure
+      uses: actions/github-script@v6
+      if : failure()
+      with:
+        script: |
+          github.rest.repos.createCommitStatus({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            sha: "${{ needs.bootstrap.outputs.git_sha }}",
+            target_url: "${{ needs.bootstrap.outputs.status_url }}",
+            state: "failure",
+            description: "Build Failed",
+            context: "${{ needs.bootstrap.outputs.status_context }}"
+          })
+    - name: Workflow Success
+      uses: actions/github-script@v6
+      if : success()
+      with:
+        script: |
+          github.rest.repos.createCommitStatus({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            sha: "${{ needs.bootstrap.outputs.git_sha }}",
+            target_url: "${{ needs.bootstrap.outputs.status_url }}",
+            state: "success",
+            description: "Build Success",
+            context: "${{ needs.bootstrap.outputs.status_context }}"
+          })
+
+  # Only runs if gradle was successful, so that means that success() is not required.
+  pull_request_update:
+    runs-on: ubuntu-latest
+    name: Update PR
+    needs:
+    - bootstrap
+    - gradle
+    if: needs.bootstrap.outputs.is_pr == 'yes'
+    steps:
+    - name: Update PR Label
+      uses: actions/github-script@v6
+      with:
+        script: |
+          github.rest.issues.addLabels({
+            issue_number: ${{ inputs.pull_request }},
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            labels: ['build_passed']
+          })
+    - name: Update PR with Automerge comment
+      if: |
+        needs.bootstrap.outputs.is_dependabot_pr == 'yes'
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const { data: comments } = await github.rest.issues.listComments({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: ${{ inputs.pull_request }},
+          })
+          const botComment = comments.find(comment => {
+            return comment.user.type === 'Bot' && comment.body.includes('Merge Status')
+          })
+          const commentBody = ":point_right: Mergeable : ${{ inputs.automerge }} (${{ inputs.update_type }})"
+          // If we have a comment, update it, otherwise create a new one
+          if (botComment) {
+            github.rest.issues.updateComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: botComment.id,
+              body: commentBody
+            })
+          } else {
+            github.rest.issues.createComment({
+              issue_number: ${{ inputs.pull_request }},
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: commentBody
+            })
+          }
+
+  dependabot_merge:
+    runs-on: ubuntu-latest
+    needs:
+    - bootstrap
+    - gradle
+    if: |
+      startsWith(inputs.target_branch, 'dependabot') &&
+      needs.bootstrap.outputs.is_dependabot_pr == 'yes' &&
+      needs.bootstrap.outputs.dependabot_merge == 'yes'
+    name: Merge Dependabot PR
+    steps:
+    - name: Checkout branch
+      uses: actions/checkout@v3
+      with:
+        ref: ${{ inputs.target_branch }}
+    - name: Dependabot Merge
+      continue-on-error: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        gh pr review --approve "${{ inputs.pull_request }}"
+        gh pr merge -r --auto "${{ inputs.pull_request }}"
