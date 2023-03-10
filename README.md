@@ -1,6 +1,6 @@
 # interlok-build-parent
 
-[![OWASP SCA](https://github.com/quotidian-ennui/interlok-build-parent/actions/workflows/owasp.yaml/badge.svg)](https://github.com/quotidian-ennui/interlok-build-parent/actions/workflows/owasp.yaml) [![Gradle](https://github.com/quotidian-ennui/interlok-build-parent/actions/workflows/gradle.yaml/badge.svg)](https://github.com/quotidian-ennui/interlok-build-parent/actions/workflows/gradle.yaml) ![license](https://img.shields.io/github/license/quotidian-ennui/interlok-build-parent.svg)
+[![owasp](https://github.com/quotidian-ennui/interlok-build-parent/actions/workflows/owasp.yml/badge.svg)](https://github.com/quotidian-ennui/interlok-build-parent/actions/workflows/owasp.yml) [![gradle](https://github.com/quotidian-ennui/interlok-build-parent/actions/workflows/gradle.yml/badge.svg)](https://github.com/quotidian-ennui/interlok-build-parent/actions/workflows/gradle.yml) ![license](https://img.shields.io/github/license/quotidian-ennui/interlok-build-parent.svg)
 
 The suggested name was `verbose-octo-disco`
 
