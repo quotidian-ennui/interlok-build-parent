@@ -168,7 +168,7 @@ jobs:
             issue_number: ${{ inputs.pull_request }},
           })
           const botComment = comments.find(comment => {
-            return comment.user.type === 'Bot' && comment.body.includes('Merge Status')
+            return comment.user.type === 'Bot' && comment.body.includes('Mergeable :')
           })
           const commentBody = ":point_right: Mergeable : ${{ inputs.automerge }} (${{ inputs.update_type }})"
           // If we have a comment, update it, otherwise create a new one
