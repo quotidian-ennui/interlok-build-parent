@@ -14,6 +14,19 @@ apply plugin: "distribution"
 apply plugin: "java-library"
 
 ext {
+  interlokSnapshotMetadata = "https://nexus.adaptris.net/nexus/content/repositories/snapshots/com/adaptris/interlok-core/maven-metadata.xml"
+  interlokReleaseMetadata = "https://nexus.adaptris.net/nexus/content/repositories/releases/com/adaptris/interlok-core/maven-metadata.xml"
+  interlokVersioning = [
+    latestRelease: { ->
+      def mavenMetadata=new XmlSlurper().parse(interlokReleaseMetadata)
+      return mavenMetadata.versioning.latest.text()
+    },
+    latestSnapshot: {->
+      def mavenMetadata=new XmlSlurper().parse(interlokSnapshotMetadata)
+      return mavenMetadata.versioning.latest.text()
+    }
+  ]
+
   localInterlokRepo = project.findProperty('localInterlokRepo') ?: 'unknown'
   nexusBaseUrl  = 'https://nexus.adaptris.net'
   log4j2Version='2.20.0'
@@ -25,7 +38,7 @@ ext {
   bouncyCastleSubsitutionVersion='1.72'
 
   // Make semi-required optional components have an explicit version
-  interlokVersion = project.findProperty('interlokVersion') ?: '4.7.0-RELEASE'
+  interlokVersion = project.findProperty('interlokVersion') ?: interlokVersioning.latestSnapshot()
   interlokHelperVersion = project.findProperty('interlokVersion') ?: interlokVersion
   interlokServiceTesterVersion = project.findProperty('interlokServiceTesterVersion') ?: interlokVersion
   interlokUiVersion = project.findProperty('interlokUiVersion') ?: interlokVersion
