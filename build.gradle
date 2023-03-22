@@ -331,16 +331,8 @@ dependencies {
   interlokRuntime ('com.sun.activation:jakarta.activation:1.2.2')
   interlokRuntime ('jakarta.management.j2ee:jakarta.management.j2ee-api:1.1.4')
 
-  interlokRuntime ("com.thoughtworks.xstream:xstream:1.4.20")
-
   // CVE-2022-2048 - use the bom to upgrade things we can.
   interlokRuntime (platform("org.eclipse.jetty:jetty-bom:9.4.51.v20230217"))
-
-  // CVE-2022-42889
-  interlokRuntime ("org.apache.commons:commons-text:1.10.0")
-
-  // CVE-2021-37533
-  interlokRuntime ("commons-net:commons-net:3.9.0")
 
   // snakeyaml 1.30 CVE-2022-25857, CVE-2022-38749, CVE-2022-38751, CVE-2022-38752, CVE-2022-38750
   // We're end up with jackson as a transitive deps in almost all cases so this
@@ -350,7 +342,6 @@ dependencies {
   interlokRuntime ("com.fasterxml.jackson.core:jackson-annotations")
   interlokRuntime ("com.fasterxml.jackson.core:jackson-databind")
   interlokRuntime ("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml")
-
 
   interlokTestRuntime group: "com.adaptris", name: "interlok-service-tester", version: interlokPatch.serviceTesterVersion(), changing: true
   interlokWar group: "com.adaptris.ui", name: "interlok", version: interlokPatch.uiVersion(), changing: true, ext: "war"
