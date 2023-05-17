@@ -24,13 +24,7 @@ ext {
     // Pin to the latest v4... since v5 requires J17
     latestSnapshot: {->
       def mavenMetadata=new XmlSlurper().parse(interlokSnapshotMetadata)
-      def list = []
-      mavenMetadata.versioning.versions.version.each {
-        if (it.text().startsWith("4")) {
-          list.add(it.text())
-        }
-      }
-      return list.reverse().get(0)
+      return mavenMetadata.versioning.versions.version.findAll { it.text().startsWith("4") }.collect{ it.text() }.sort().reverse().get(0)
     }
   ]
 
