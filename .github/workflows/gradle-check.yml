@@ -99,9 +99,7 @@ jobs:
         arguments: check
         build-root-directory: test
       env:
-        JAVA_TOOL_OPTIONS: -Dpolyglot.js.nashorn-compat=true -Dpolyglot.engine.WarnInterpreterOnly=false
-        ADX_REPO_USER: ${{ secrets.ADX_REPO_USER }}
-        ADX_REPO_PASSWORD: ${{ secrets.ADX_REPO_PASSWORD }}
+        JDK_JAVA_OPTIONS: -Dpolyglot.js.nashorn-compat=true -Dpolyglot.engine.WarnInterpreterOnly=false
     - name: Gradle Build Reports
       uses: actions/upload-artifact@v3
       with:
@@ -168,9 +166,9 @@ jobs:
             issue_number: ${{ inputs.pull_request }},
           })
           const botComment = comments.find(comment => {
-            return comment.user.type === 'Bot' && comment.body.includes('Automerge :')
+            return comment.user.type === 'Bot' && comment.body.includes('automerge :')
           })
-          const commentBody = ":vertical_traffic_light: Automerge : ${{ inputs.automerge }} because ${{ inputs.update_type }}"
+          const commentBody = ":dependabot: automerge : ${{ inputs.automerge }} because it is a ${{ inputs.update_type }}"
           // If we have a comment, update it, otherwise create a new one
           if (botComment) {
             github.rest.issues.updateComment({
