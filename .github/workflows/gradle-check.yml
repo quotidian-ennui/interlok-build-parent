@@ -84,7 +84,7 @@ jobs:
     name: Gradle Check
     steps:
     - name: Checkout branch
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         ref: ${{ inputs.target_branch }}
     - name: Set up JDK 11
@@ -198,7 +198,7 @@ jobs:
     name: Merge Dependabot PR
     steps:
     - name: Checkout branch
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         ref: ${{ inputs.target_branch }}
     - name: Dependabot Merge
