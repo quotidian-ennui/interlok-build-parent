@@ -21,7 +21,7 @@ allprojects {
 dependencies {
   interlokRuntime ("com.adaptris:interlok-json:$interlokVersion")
   interlokRuntime ("org.json:json:20230618")
-  interlokRuntime ("net.minidev:json-smart:2.4.11")
+  interlokRuntime ("net.minidev:json-smart:2.5.0")
 }
 // works around an issue with dependency-check-gradle:8.0.1 where groovy
 // add to a list doesn't "coerce $rootDir" into a string at the right time.
