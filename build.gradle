@@ -333,7 +333,7 @@ dependencies {
   interlokRuntime ('jakarta.management.j2ee:jakarta.management.j2ee-api:1.1.4')
 
   // CVE-2022-2048 - use the bom to upgrade things we can.
-  interlokRuntime (platform("org.eclipse.jetty:jetty-bom:9.4.52.v20230823"))
+  interlokRuntime (platform("org.eclipse.jetty:jetty-bom:9.4.53.v20231009"))
 
   // snakeyaml 1.30 CVE-2022-25857, CVE-2022-38749, CVE-2022-38751, CVE-2022-38752, CVE-2022-38750
   // We're end up with jackson as a transitive deps in almost all cases so this
