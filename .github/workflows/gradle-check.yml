@@ -64,7 +64,7 @@ jobs:
         echo "git_sha=${{ inputs.sha || github.event.pull_request.head.sha || github.event.workflow_run.head_sha || github.sha }}" >> $GITHUB_OUTPUT
         echo "status_url=https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> $GITHUB_OUTPUT
     - name: Build Pending
-      uses: actions/github-script@v6
+      uses: actions/github-script@v7
       with:
         script: |
           github.rest.repos.createCommitStatus({
@@ -107,7 +107,7 @@ jobs:
         path: |
           **/build/reports
     - name: Workflow Failure
-      uses: actions/github-script@v6
+      uses: actions/github-script@v7
       if : failure()
       with:
         script: |
@@ -121,7 +121,7 @@ jobs:
             context: "${{ needs.bootstrap.outputs.status_context }}"
           })
     - name: Workflow Success
-      uses: actions/github-script@v6
+      uses: actions/github-script@v7
       if : success()
       with:
         script: |
@@ -145,7 +145,7 @@ jobs:
     if: needs.bootstrap.outputs.is_pr == 'yes'
     steps:
     - name: Update PR Label
-      uses: actions/github-script@v6
+      uses: actions/github-script@v7
       with:
         script: |
           github.rest.issues.addLabels({
