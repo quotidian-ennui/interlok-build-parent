@@ -37,31 +37,22 @@ jobs:
     - name: Allow merge on semver-patch
       id: depbot-merge
       run: |
-        if [ "${{ steps.depbot-metadata.outputs.update-type }}" == "version-update:semver-patch" ]
-        then
+        if [[ "${{ steps.depbot-metadata.outputs.update-type }}" == "version-update:semver-patch" ]]; then
           echo "automerge=yes" >> $GITHUB_OUTPUT
         else
           echo "automerge=no" >> $GITHUB_OUTPUT
         fi
-    - name: Repository Dispatch Event
-      uses: actions/github-script@v6
-      env:
-        evt_payload: |
-          {
-            "branch" : "${{ github.head_ref }}",
-            "sha": "${{ github.event.pull_request.head.sha }}",
-            "pull_request": "${{ steps.findpr.outputs.pr }}",
-            "automerge": "${{ steps.depbot-merge.outputs.automerge }}",
-            "update-type": "${{ steps.depbot-metadata.outputs.update-type }}"
-          }
-        evt_type: "dependabot-build"
+    - name: dispatch
+      id: dispatch
+      uses: quotidian-ennui/actions-olio/repo-dispatch@main
       with:
-        script: |
-          const { evt_payload , evt_type } = process.env
-          console.log(evt_payload)
-          github.rest.repos.createDispatchEvent({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              event_type: evt_type,
-              client_payload: JSON.parse(evt_payload)
-          })
+        event_type: dependabot-build
+        token: ${{ secrets.GITHUB_TOKEN }}
+        sha: ${{ github.event.pull_request.head.sha || github.event.workflow_run.head_sha || github.sha }}
+        ref: ${{ github.head_ref }}
+        event_detail: |
+          {
+            "pull_request": "${{ steps.findpr.outputs.pr }}",
+            "dependabot_automerge": "${{ steps.depbot-merge.outputs.automerge || 'no' }}",
+            "dependabot_update_type": "${{ steps.depbot-metadata.outputs.update-type || 'unknown' }}"
+          }

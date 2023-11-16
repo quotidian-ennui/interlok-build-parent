@@ -155,36 +155,24 @@ jobs:
             labels: ['build_passed']
           })
     - name: Update PR with Automerge comment
+      id: comment
       if: |
         needs.bootstrap.outputs.is_dependabot_pr == 'yes'
-      uses: actions/github-script@v6
+      uses: quotidian-ennui/actions-olio/pr-or-issue-comment@main
       with:
-        script: |
-          const { data: comments } = await github.rest.issues.listComments({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            issue_number: ${{ inputs.pull_request }},
-          })
-          const botComment = comments.find(comment => {
-            return comment.user.type === 'Bot' && comment.body.includes('automerge :')
-          })
-          const commentBody = ":dependabot: automerge : ${{ inputs.automerge }} because it is a ${{ inputs.update_type }}"
-          // If we have a comment, update it, otherwise create a new one
-          if (botComment) {
-            github.rest.issues.updateComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              comment_id: botComment.id,
-              body: commentBody
-            })
-          } else {
-            github.rest.issues.createComment({
-              issue_number: ${{ inputs.pull_request }},
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: commentBody
-            })
-          }
+        issue_number: ${{ inputs.pull_request }}
+        body: |
+          :dependabot: Attempt Merge: ${{ needs.bootstrap.outputs.dependabot_merge }}
+
+          | Decision Table | Value |
+          | ------ | ------ |
+          |Update Type| ${{ inputs.update_type }} |
+          |Pull Request| ${{ inputs.pull_request }} |
+          |automerge | ${{ inputs.automerge }} |
+          |is_dependabot| ${{ needs.bootstrap.outputs.is_dependabot_pr }} |
+          |dependabot_merge | ${{ needs.bootstrap.outputs.dependabot_merge }} |
+        token: ${{ secrets.GITHUB_TOKEN }}
+        search_term: "dependabot-automerge-status"
 
   dependabot_merge:
     runs-on: ubuntu-latest
