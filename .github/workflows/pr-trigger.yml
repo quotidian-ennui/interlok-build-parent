@@ -1,4 +1,5 @@
-name: dependabot
+name: pr-trigger
+run-name: PR Build Trigger
 on:
   pull_request:
     branches:
@@ -8,19 +9,13 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-# Dependabot doesn't have access to secrets
-# which means the private github package repo isn't
-# accessible via a standard PR github action.
-# https://github.com/dependabot/dependabot-core/issues/3253#issuecomment-852541544
-# This then triggers dependabot-build.yml
 jobs:
   depbot-repo-dispatch:
     permissions:
       contents: write
-      pull-requests: write
-      issues: write
+      pull-requests: read
+      issues: read
     runs-on: ubuntu-latest
-    if: ${{ github.actor == 'dependabot[bot]' }}
     name: Dependabot Workflow Trigger
     steps:
     - name: Find associated PR
@@ -31,13 +26,23 @@ jobs:
         state: open
         sha: ${{ github.event.pull_request.head.sha || github.event.workflow_run.head_sha || github.sha }}
     - name: Grab Dependabot metadata
+      if: ${{ github.actor == 'dependabot[bot]' }}
       id: depbot-metadata
       continue-on-error: true
       uses: dependabot/fetch-metadata@v1
     - name: Allow merge on semver-patch
       id: depbot-merge
       run: |
-        if [[ "${{ steps.depbot-metadata.outputs.update-type }}" == "version-update:semver-patch" ]]; then
+        function ok_to_update() {
+         local update_type=${1/version-update:/}
+         case "$update_type" in
+         semver-patch) return 0;;
+         *) return 1;;
+         esac
+        }
+        # shellcheck disable=SC2091
+        if ok_to_update "${{ steps.depbot-metadata.outputs.update-type }}"
+        then
           echo "automerge=yes" >> $GITHUB_OUTPUT
         else
           echo "automerge=no" >> $GITHUB_OUTPUT
@@ -46,7 +51,7 @@ jobs:
       id: dispatch
       uses: quotidian-ennui/actions-olio/repo-dispatch@main
       with:
-        event_type: dependabot-build
+        event_type: pr-build
         token: ${{ secrets.GITHUB_TOKEN }}
         sha: ${{ github.event.pull_request.head.sha || github.event.workflow_run.head_sha || github.sha }}
         ref: ${{ github.head_ref }}

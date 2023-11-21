@@ -1,8 +1,19 @@
 name: dependabot-build
+run-name: Build PR (${{ github.event.client_payload.detail.pull_request }})
 on:
   repository_dispatch:
     types:
-      - dependabot-build
+      - pr-build
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.client_payload.base.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  statuses: write
 
 jobs:
   build:
