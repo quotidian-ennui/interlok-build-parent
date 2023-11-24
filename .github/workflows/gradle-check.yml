@@ -68,7 +68,6 @@ jobs:
         else
           echo "is_dependabot_pr=false"  >> "$GITHUB_OUTPUT"
         fi
-        echo "status_url=https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> "$GITHUB_OUTPUT"
 
   gradle:
     runs-on: ubuntu-latest
@@ -84,7 +83,6 @@ jobs:
       with:
         state: pending
         sha: ${{ inputs.sha }}
-        status_url: ${{ needs.bootstrap.outputs.status_url }}
         context: ${{ needs.bootstrap.outputs.status_context }}
         label_prefix: ${{ needs.bootstrap.outputs.label_prefix }}
     - name: Checkout branch
@@ -120,7 +118,6 @@ jobs:
       with:
         state: ${{ steps.gradle.outcome }}
         sha: ${{ inputs.sha }}
-        status_url: ${{ needs.bootstrap.outputs.status_url }}
         context: ${{ needs.bootstrap.outputs.status_context }}
         label_prefix: ${{ needs.bootstrap.outputs.label_prefix }}
 
