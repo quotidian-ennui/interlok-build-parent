@@ -1,19 +1,16 @@
 name: gradle-check
+run-name: Gradle Check
 
 on:
   workflow_call:
     inputs:
-      target_branch:
+      ref:
         required: true
         description: 'The branch to checkout and work-on'
         type: string
       pull_request:
         required: false
         description: 'The Pull Request No.'
-        type: string
-      automerge:
-        required: false
-        description: 'Whether or not to automerge the PR on success'
         type: string
       update_type:
         required: false
@@ -23,6 +20,11 @@ on:
         required: false
         description: 'SHA of the commit'
         type: string
+      actor:
+        required: false
+        description: 'The actor associated with the PR'
+        type: string
+        default: ${{ github.actor }}
 
 jobs:
   bootstrap:
@@ -33,32 +35,40 @@ jobs:
       status_context: "Gradle Check"
       is_pr: ${{ steps.compute.outputs.is_pr }}
       is_dependabot_pr: ${{ steps.compute.outputs.is_dependabot_pr }}
-      dependabot_merge: ${{ steps.compute.outputs.dependabot_merge }}
       label_prefix: "build_"
+      gradle_modified: ${{ steps.changes.outputs.gradle_any_changed }}
+      actions_modified: ${{ steps.changes.outputs.workflows_any_changed }}
     steps:
+    - name: Checkout
+      uses: actions/checkout@v4.0.0
+      with:
+        ref: ${{ inputs.ref }}
+    - name: Changed Files
+      # Attempt to figure out what files have changed
+      id: changes
+      uses: tj-actions/changed-files@v40
+      with:
+        files_yaml: |
+          gradle:
+            - "**/build.gradle"
+          workflows:
+            - ".github/workflows/**"
     - name: Compute Activities
       id: compute
       run: |
-        # For attempt at DRY.
-        if [ "${{ inputs.pull_request }}" != "" ]
+        if [[ "${{ inputs.pull_request }}" != "" ]]
         then
-          echo "is_pr=yes"  >> $GITHUB_OUTPUT
+          echo "is_pr=true"  >> "$GITHUB_OUTPUT"
         else
-          echo "is_pr=no"  >> $GITHUB_OUTPUT
+          echo "is_pr=false"  >> "$GITHUB_OUTPUT"
         fi
-        if [[ "${{ inputs.pull_request }}" != "" && "${{ inputs.automerge }}" != "" && "${{ inputs.update_type }}" != "" ]]
+        if [[ "${{ inputs.pull_request }}" != "" && "${{ inputs.actor }}" == "dependabot[bot]" ]]
         then
-          echo "is_dependabot_pr=yes"  >> $GITHUB_OUTPUT
+          echo "is_dependabot_pr=true"  >> "$GITHUB_OUTPUT"
         else
-          echo "is_dependabot_pr=no"  >> $GITHUB_OUTPUT
+          echo "is_dependabot_pr=false"  >> "$GITHUB_OUTPUT"
         fi
-        if [[ "${{ inputs.pull_request }}" != "" && "${{ inputs.automerge }}" == "yes" && "${{ inputs.update_type }}" != "" ]]
-        then
-          echo "dependabot_merge=yes"  >> $GITHUB_OUTPUT
-        else
-          echo "dependabot_merge=no"  >> $GITHUB_OUTPUT
-        fi
-        echo "status_url=https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> $GITHUB_OUTPUT
+        echo "status_url=https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> "$GITHUB_OUTPUT"
 
   gradle:
     runs-on: ubuntu-latest
@@ -69,34 +79,34 @@ jobs:
     - name: Build Pending
       uses: quotidian-ennui/actions-olio/commit-status-and-label@main
       if: |
-        needs.bootstrap.outputs.is_pr == 'yes' &&
+        needs.bootstrap.outputs.is_pr == 'true' &&
         inputs.sha != ''
       with:
         state: pending
         sha: ${{ inputs.sha }}
         status_url: ${{ needs.bootstrap.outputs.status_url }}
         context: ${{ needs.bootstrap.outputs.status_context }}
-        label_prefix: ${{ steps.bootstrap.outputs.label_prefix }}}
+        label_prefix: ${{ needs.bootstrap.outputs.label_prefix }}
     - name: Checkout branch
-      uses: actions/checkout@v4
+      uses: actions/checkout@v4.0.0
       with:
-        ref: ${{ inputs.target_branch }}
+        ref: ${{ inputs.ref }}
     - name: Set up JDK 11
-      uses: actions/setup-java@v3
+      uses: actions/setup-java@v3.13.0
       with:
         java-version: 11
         distribution: 'temurin'
     - name: Execute Gradle Check
-      uses: gradle/gradle-build-action@v2
+      uses: gradle/gradle-build-action@v2.9.0
       id: gradle
       with:
-        gradle-version: current
+        gradle-version: 7.6.2
         arguments: check
         build-root-directory: test
       env:
         JDK_JAVA_OPTIONS: -Dpolyglot.js.nashorn-compat=true -Dpolyglot.engine.WarnInterpreterOnly=false
     - name: Gradle Build Reports
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v3.1.3
       with:
         name: build-reports
         path: |
@@ -104,7 +114,7 @@ jobs:
     - name: Build Result
       if: |
         (success() || failure()) &&
-        needs.bootstrap.outputs.is_pr == 'yes' &&
+        needs.bootstrap.outputs.is_pr == 'true' &&
         inputs.sha != ''
       uses: quotidian-ennui/actions-olio/commit-status-and-label@main
       with:
@@ -112,45 +122,125 @@ jobs:
         sha: ${{ inputs.sha }}
         status_url: ${{ needs.bootstrap.outputs.status_url }}
         context: ${{ needs.bootstrap.outputs.status_context }}
-        label_prefix: ${{ steps.bootstrap.outputs.label_prefix }}}
+        label_prefix: ${{ needs.bootstrap.outputs.label_prefix }}
 
-  # Only runs if gradle was successful, so that means that success() is not required.
-  dependabot_merge:
+  dependabot_merge_gradle:
     runs-on: ubuntu-latest
-    name: Update PR
+    name: Dependabot Merge (gradle changes)
     needs:
     - bootstrap
     - gradle
-    if: needs.bootstrap.outputs.is_pr == 'yes'
+    if: |
+      needs.bootstrap.outputs.is_dependabot_pr == 'true' &&
+      needs.bootstrap.outputs.gradle_modified == 'true'
     steps:
+    - name: Checkout branch
+      uses: actions/checkout@v4.0.0
+      with:
+        ref: ${{ inputs.ref }}
+    - name: Allow merge on semver-patch
+      id: allow_merge
+      run: |
+        function patch_only() {
+         local update_type=${1/version-update:/}
+         case "$update_type" in
+         semver-patch) return 0;;
+         *) return 1;;
+         esac
+        }
+        # shellcheck disable=SC2091
+        if patch_only "${{ inputs.update_type }}"
+        then
+          echo "automerge=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "automerge=false" >> "$GITHUB_OUTPUT"
+        fi
     - name: Update PR with Automerge comment
       id: comment
-      if: |
-        needs.bootstrap.outputs.is_dependabot_pr == 'yes'
       uses: quotidian-ennui/actions-olio/pr-or-issue-comment@main
       with:
         issue_number: ${{ inputs.pull_request }}
         body: |
-          :dependabot: Attempt Merge: ${{ needs.bootstrap.outputs.dependabot_merge }}
+          :dependabot: Attempt Merge: ${{ steps.allow_merge.outputs.automerge }}
 
           | Decision Table | Value |
           | ------ | ------ |
+          |Automerge allowed up to| semver-patch |
           |Update Type| ${{ inputs.update_type }} |
           |Pull Request| ${{ inputs.pull_request }} |
-          |automerge | ${{ inputs.automerge }} |
           |is_dependabot| ${{ needs.bootstrap.outputs.is_dependabot_pr }} |
-          |dependabot_merge | ${{ needs.bootstrap.outputs.dependabot_merge }} |
+          |gradle changes| ${{ needs.bootstrap.outputs.gradle_modified }} |
+          |action changes| ${{ needs.bootstrap.outputs.actions_modified }} |
         token: ${{ secrets.GITHUB_TOKEN }}
-        search_term: "dependabot-automerge-status"
+        search_term: "dependabot-action-automerge-status"
     - name: Dependabot Merge
+      id: try_merge
       continue-on-error: true
       if: |
-        startsWith(inputs.target_branch, 'dependabot') &&
-        needs.bootstrap.outputs.is_dependabot_pr == 'yes' &&
-        needs.bootstrap.outputs.dependabot_merge == 'yes'
+        startsWith(inputs.ref, 'dependabot') &&
+        steps.allow_merge.outputs.automerge == 'true'
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         gh pr review --approve "${{ inputs.pull_request }}"
         gh pr merge -r --auto "${{ inputs.pull_request }}"
 
+  dependabot_merge_actions:
+    runs-on: ubuntu-latest
+    name: Dependabot Merge (action changes)
+    needs:
+    - bootstrap
+    - gradle
+    if: |
+      needs.bootstrap.outputs.is_dependabot_pr == 'true' &&
+      needs.bootstrap.outputs.actions_modified == 'true'
+    steps:
+    - name: Checkout branch
+      uses: actions/checkout@v4.0.0
+      with:
+        ref: ${{ inputs.ref }}
+    - name: Allow merge on semver-minor
+      id: allow_merge
+      run: |
+        function patch_or_minor() {
+         local update_type=${1/version-update:/}
+         case "$update_type" in
+         semver-patch|semver-minor) return 0;;
+         *) return 1;;
+         esac
+        }
+        # shellcheck disable=SC2091
+        if patch_or_minor "${{ inputs.update_type }}"
+        then
+          echo "automerge=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "automerge=false" >> "$GITHUB_OUTPUT"
+        fi
+    - name: Update PR with Automerge comment
+      id: comment
+      uses: quotidian-ennui/actions-olio/pr-or-issue-comment@main
+      with:
+        issue_number: ${{ inputs.pull_request }}
+        body: |
+          :dependabot: Attempt Merge: ${{ steps.allow_merge.outputs.automerge }}
+
+          | Decision Table | Value |
+          | ------ | ------ |
+          |Automerge allowed up to| semver-minor |
+          |Update Type| ${{ inputs.update_type }} |
+          |Pull Request| ${{ inputs.pull_request }} |
+          |is_dependabot| ${{ needs.bootstrap.outputs.is_dependabot_pr }} |
+          |gradle changes| ${{ needs.bootstrap.outputs.gradle_modified }} |
+          |action changes| ${{ needs.bootstrap.outputs.actions_modified }} |
+        token: ${{ secrets.GITHUB_TOKEN }}
+        search_term: "dependabot-gradle-automerge-status"
+    - name: Dependabot Merge
+      continue-on-error: true
+      if: |
+        startsWith(inputs.ref, 'dependabot') &&
+        steps.allow_merge.outputs.automerge == 'true'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        gh pr review --approve "${{ inputs.pull_request }}"
+        gh pr merge -r --auto "${{ inputs.pull_request }}"

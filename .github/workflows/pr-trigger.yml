@@ -30,23 +30,6 @@ jobs:
       id: depbot-metadata
       continue-on-error: true
       uses: dependabot/fetch-metadata@v1
-    - name: Allow merge on semver-patch
-      id: depbot-merge
-      run: |
-        function ok_to_update() {
-         local update_type=${1/version-update:/}
-         case "$update_type" in
-         semver-patch) return 0;;
-         *) return 1;;
-         esac
-        }
-        # shellcheck disable=SC2091
-        if ok_to_update "${{ steps.depbot-metadata.outputs.update-type }}"
-        then
-          echo "automerge=yes" >> $GITHUB_OUTPUT
-        else
-          echo "automerge=no" >> $GITHUB_OUTPUT
-        fi
     - name: dispatch
       id: dispatch
       uses: quotidian-ennui/actions-olio/repo-dispatch@main
@@ -58,6 +41,5 @@ jobs:
         event_detail: |
           {
             "pull_request": "${{ steps.findpr.outputs.pr }}",
-            "dependabot_automerge": "${{ steps.depbot-merge.outputs.automerge || 'no' }}",
             "dependabot_update_type": "${{ steps.depbot-metadata.outputs.update-type || 'unknown' }}"
           }

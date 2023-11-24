@@ -19,8 +19,8 @@ jobs:
   build:
     uses: ./.github/workflows/gradle-check.yml
     with:
-      target_branch: ${{ github.event.client_payload.base.ref }}
+      ref: ${{ github.event.client_payload.base.ref }}
       sha: ${{ github.event.client_payload.base.sha }}
       pull_request: ${{ github.event.client_payload.detail.pull_request }}
-      automerge: ${{ github.event.client_payload.detail.dependabot_automerge }}
       update_type: ${{ github.event.client_payload.detail.dependabot_update_type }}
+      actor: ${{ github.event.client_payload.base.actor }}
