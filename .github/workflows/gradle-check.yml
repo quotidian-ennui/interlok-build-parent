@@ -25,6 +25,11 @@ on:
         description: 'The actor associated with the PR'
         type: string
         default: ${{ github.actor }}
+      gradle_version:
+        required: false
+        description: 'Gradle version to use'
+        type: string
+        default: "7.6.3"
 
 jobs:
   bootstrap:
@@ -98,7 +103,7 @@ jobs:
       uses: gradle/gradle-build-action@v2.9.0
       id: gradle
       with:
-        gradle-version: 7.6.2
+        gradle-version: ${{ inputs.gradle_version }}
         arguments: check
         build-root-directory: test
       env:
