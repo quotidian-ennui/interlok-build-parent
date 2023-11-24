@@ -40,7 +40,7 @@ jobs:
       actions_modified: ${{ steps.changes.outputs.workflows_any_changed }}
     steps:
     - name: Checkout
-      uses: actions/checkout@v4.0.0
+      uses: actions/checkout@v4.1.1
       with:
         ref: ${{ inputs.ref }}
     - name: Changed Files
@@ -88,7 +88,7 @@ jobs:
         context: ${{ needs.bootstrap.outputs.status_context }}
         label_prefix: ${{ needs.bootstrap.outputs.label_prefix }}
     - name: Checkout branch
-      uses: actions/checkout@v4.0.0
+      uses: actions/checkout@v4.1.1
       with:
         ref: ${{ inputs.ref }}
     - name: Set up JDK 11
@@ -135,7 +135,7 @@ jobs:
       needs.bootstrap.outputs.gradle_modified == 'true'
     steps:
     - name: Checkout branch
-      uses: actions/checkout@v4.0.0
+      uses: actions/checkout@v4.1.1
       with:
         ref: ${{ inputs.ref }}
     - name: Allow merge on semver-patch
@@ -196,7 +196,7 @@ jobs:
       needs.bootstrap.outputs.actions_modified == 'true'
     steps:
     - name: Checkout branch
-      uses: actions/checkout@v4.0.0
+      uses: actions/checkout@v4.1.1
       with:
         ref: ${{ inputs.ref }}
     - name: Allow merge on semver-minor
