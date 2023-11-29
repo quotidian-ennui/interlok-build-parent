@@ -25,10 +25,15 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+permissions: {}
+
 jobs:
   owasp:
     name: OWASP Dependency Check Analyze
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
     - name: Checkout
       uses: actions/checkout@v4.1.1
@@ -55,10 +60,23 @@ jobs:
           ${{ runner.os }}-dependency-check-data-
     - name: Gradle DependencyCheckAnalyze
       uses: gradle/gradle-build-action@v2.10.0
-      continue-on-error: true
+      id: owasp
       env:
         JAVA_TOOL_OPTIONS: -Dpolyglot.js.nashorn-compat=true -Dpolyglot.engine.WarnInterpreterOnly=false
       with:
         gradle-version: ${{ env.GRADLE_VERSION }}
         arguments: dependencyCheckAnalyze
         build-root-directory: test
+    - name: Update PR
+      id: comment
+      uses: quotidian-ennui/actions-olio/pr-or-issue-comment@main
+      if: |
+        (success() || failure()) &&
+        github.event_name == 'pull_request' &&
+        github.event.pull_request.number != ''
+      with:
+        issue_number: ${{ github.event.pull_request.number }}
+        body: |
+          OWASP Dependency Check: ${{ steps.owasp.outcome }}
+        search_term: "dependabot-action-dependency-check-analyze"
+        token: ${{ github.token }}
