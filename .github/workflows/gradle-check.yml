@@ -29,7 +29,7 @@ on:
         required: false
         description: 'Gradle version to use'
         type: string
-        default: "7.6.3"
+        default: "8.4"
 
 jobs:
   bootstrap:
@@ -51,7 +51,7 @@ jobs:
     - name: Changed Files
       # Attempt to figure out what files have changed
       id: changes
-      uses: tj-actions/changed-files@v40
+      uses: tj-actions/changed-files@v40.2.0
       with:
         files_yaml: |
           gradle:
@@ -97,7 +97,7 @@ jobs:
     - name: Set up JDK 11
       uses: actions/setup-java@v4.0.0
       with:
-        java-version: 11
+        java-version: 21
         distribution: 'temurin'
     - name: Execute Gradle Check
       uses: gradle/gradle-build-action@v2.10.0

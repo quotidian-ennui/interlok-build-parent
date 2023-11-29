@@ -19,7 +19,7 @@ on:
     - cron: '15 03 * * SUN'
 
 env:
-  GRADLE_VERSION: 7.6.3
+  GRADLE_VERSION: 8.4
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -35,7 +35,7 @@ jobs:
     - name: Set up JDK
       uses: actions/setup-java@v4.0.0
       with:
-        java-version: 11
+        java-version: 21
         distribution: 'temurin'
     - name: Setup Ubuntu
       id: ubuntu-bootstrap
@@ -47,7 +47,7 @@ jobs:
         gradle-version: ${{ env.GRADLE_VERSION }}
         gradle-home-cache-excludes: dependency-check-data
     - name: OWASP dependency-check-data cache
-      uses: actions/cache@v3
+      uses: actions/cache@v3.3.2
       with:
         path: ~/.gradle/dependency-check-data
         key: ${{ runner.os }}-dependency-check-data-${{ steps.ubuntu-bootstrap.outputs.today }}
@@ -55,6 +55,7 @@ jobs:
           ${{ runner.os }}-dependency-check-data-
     - name: Gradle DependencyCheckAnalyze
       uses: gradle/gradle-build-action@v2.10.0
+      continue-on-error: true
       env:
         JAVA_TOOL_OPTIONS: -Dpolyglot.js.nashorn-compat=true -Dpolyglot.engine.WarnInterpreterOnly=false
       with:

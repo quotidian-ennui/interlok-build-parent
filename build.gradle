@@ -24,7 +24,8 @@ ext {
     // Pin to the latest v4... since v5 requires J17
     latestSnapshot: {->
       def mavenMetadata=new XmlSlurper().parse(interlokSnapshotMetadata)
-      return mavenMetadata.versioning.versions.version.findAll { it.text().startsWith("4") }.collect{ it.text() }.sort().reverse().get(0)
+      return mavenMetadata.versioning.latest.text()
+      // return mavenMetadata.versioning.versions.version.findAll { it.text().startsWith("4") }.collect{ it.text() }.sort().reverse().get(0)
     }
   ]
 
@@ -661,6 +662,11 @@ task checkJavaVersion {
     if (interlokVersion.startsWith("4")) {
       if (JavaVersion.current().ordinal() < JavaVersion.VERSION_11.ordinal()) {
         throw new GradleException("We're running with " + JavaVersion.current() + " and not Java 11")
+      }
+    }
+    if (interlokVersion.startsWith("5")) {
+      if (JavaVersion.current().ordinal() < JavaVersion.VERSION_17.ordinal()) {
+        throw new GradleException("We're running with " + JavaVersion.current() + " and not Java 17+")
       }
     }
   }
