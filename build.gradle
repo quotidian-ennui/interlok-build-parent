@@ -93,6 +93,8 @@ ext {
   interlokVerifyCategory = project.findProperty('interlokVerifyCategory') ?: "CODE_SMELL"
   interlokVerifyLevel = project.findProperty('interlokVerifyLevel') ?: "INFO"
   interlokVerifyPrefix = "$interlokVerifyCategory,$interlokVerifyLevel,"
+
+  dependencyCheckNvdApiKey = System.env.containsKey("NVD_API_KEY") ? System.env.NVD_API_KEY : ""
 }
 
 enum VerifyModes {
@@ -679,6 +681,13 @@ dependencyCheck  {
   formats = [ "HTML", "JUNIT" ]
   analyzers {
     assemblyEnabled=false
+  }
+  nvd {
+    if (dependencyCheckNvdApiKey.isEmpty()) {
+      println("Set an NVD api key using the environment variable NVD_API_KEY")
+    } else {
+      apiKey=dependencyCheckNvdApiKey
+    }
   }
 }
 
