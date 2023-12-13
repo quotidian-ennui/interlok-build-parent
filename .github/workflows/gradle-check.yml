@@ -100,7 +100,7 @@ jobs:
         java-version: 21
         distribution: 'temurin'
     - name: Execute Gradle Check
-      uses: gradle/gradle-build-action@v2.10.0
+      uses: gradle/gradle-build-action@v2.11.0
       id: gradle
       with:
         gradle-version: ${{ inputs.gradle_version }}
