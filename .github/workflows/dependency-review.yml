@@ -17,7 +17,7 @@ jobs:
     - name: 'Checkout Repository'
       uses: actions/checkout@v4.1.1
     - name: 'Dependency Review'
-      uses: actions/dependency-review-action@v3.1.4
+      uses: actions/dependency-review-action@v3.1.5
       with:
         comment-summary-in-pr: true
         vulnerability-check: true
