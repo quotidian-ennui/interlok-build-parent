@@ -51,7 +51,7 @@ jobs:
     - name: Changed Files
       # Attempt to figure out what files have changed
       id: changes
-      uses: tj-actions/changed-files@v40.2.3
+      uses: tj-actions/changed-files@v41.0.1
       with:
         files_yaml: |
           gradle:
