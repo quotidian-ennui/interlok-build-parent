@@ -87,7 +87,7 @@
       <notes><![CDATA[
       file name: jackson-core-2.14.2.jar
       Low confidence match for org.json:json leads to false positive
-      ]]></notes>
+      ]]>      </notes>
       <packageUrl regex="true">^pkg:maven/com\.fasterxml\.jackson\.core/jackson\-core@.*$</packageUrl>
       <cpe>cpe:/a:fasterxml:jackson-modules-java8</cpe>
       <cpe>cpe:/a:json-java_project:json-java</cpe>
@@ -96,7 +96,7 @@
       <notes><![CDATA[
       file name: json-path-2.7.0.jar
       Low confidence match for org.json:json leads to false positive
-      ]]></notes>
+      ]]>      </notes>
       <packageUrl regex="true">^pkg:maven/com\.jayway\.jsonpath/json\-path@.*$</packageUrl>
       <cpe>cpe:/a:json-java_project:json-java</cpe>
    </suppress>
@@ -104,9 +104,43 @@
       <notes><![CDATA[
       file name: json-smart-2.4.7.jar
       Low confidence match for org.json:json leads to false positive
-      ]]></notes>
+      ]]>      </notes>
       <packageUrl regex="true">^pkg:maven/net\.minidev/json\-smart@.*$</packageUrl>
       <cpe>cpe:/a:json-java_project:json-java</cpe>
       <cpe>cpe:/a:ini-parser_project:ini-parser</cpe>
    </suppress>
+   <suppress>
+      <notes><![CDATA[
+   file name: jetty-javax-websocket-api-1.1.2.jar
+   Because the low confidence match against eclipse:jetty with v1.1.2 is a fake
+   ]]>      </notes>
+      <packageUrl regex="true">^pkg:maven/org\.eclipse\.jetty\.toolchain/jetty\-javax\-websocket\-api@.*$</packageUrl>
+      <cpe>cpe:/a:eclipse:jetty</cpe>
+      <cpe>cpe:/a:jetty:jetty</cpe>
+   </suppress>
+   <suppress>
+      <notes><![CDATA[
+   file name: jetty-servlet-api-4.0.6.jar
+   Because the low confidence match against eclipse:jetty with v4.0.6 is a fake
+   ]]>      </notes>
+      <packageUrl regex="true">^pkg:maven/org\.eclipse\.jetty\.toolchain/jetty\-servlet\-api@.*$</packageUrl>
+      <cpe>cpe:/a:eclipse:jetty</cpe>
+      <cpe>cpe:/a:jetty:jetty</cpe>
+   </suppress>
+   <suppress>
+      <notes><![CDATA[
+      file name: jetty-servlets-10.0.19.jar
+      CVE-2023-36479 is marked as patched in 10.0.16 so this is a false positive.
+      ]]></notes>
+      <packageUrl regex="true">^pkg:maven/org\.eclipse\.jetty/jetty\-servlets@.*$</packageUrl>
+      <vulnerabilityName>CVE-2023-36479</vulnerabilityName>
+   </suppress>
+<suppress>
+   <notes><![CDATA[
+   file name: json-path-2.8.0.jar
+   Shouldn't be directly affected since Criteria.parse() not referred to in interlok-json.
+   ]]></notes>
+   <packageUrl regex="true">^pkg:maven/com\.jayway\.jsonpath/json\-path@.*$</packageUrl>
+   <vulnerabilityName>CVE-2023-51074</vulnerabilityName>
+</suppress>    
 </suppressions>
