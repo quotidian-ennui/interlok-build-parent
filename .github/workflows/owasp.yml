@@ -19,7 +19,7 @@ on:
     - cron: '15 03 * * SUN'
 
 env:
-  GRADLE_VERSION: 8.4
+  GRADLE_VERSION: 8.5
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -63,6 +63,7 @@ jobs:
       id: owasp
       env:
         JAVA_TOOL_OPTIONS: -Dpolyglot.js.nashorn-compat=true -Dpolyglot.engine.WarnInterpreterOnly=false
+        NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
       with:
         gradle-version: ${{ env.GRADLE_VERSION }}
         arguments: dependencyCheckAnalyze
