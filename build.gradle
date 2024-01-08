@@ -5,7 +5,7 @@ buildscript {
     maven { url 'https://plugins.gradle.org/m2/' }
   }
   dependencies {
-    classpath 'org.owasp:dependency-check-gradle:9.0.7'
+    classpath 'org.owasp:dependency-check-gradle:9.0.8'
   }
 }
 
@@ -334,9 +334,9 @@ dependencies {
   interlokRuntime ("jakarta.validation:jakarta.validation-api:2.0.2")
   interlokRuntime ('com.sun.activation:jakarta.activation:1.2.2')
   interlokRuntime ('jakarta.management.j2ee:jakarta.management.j2ee-api:1.1.4')
+  interlokRuntime ("com.github.mwiede:jsch:0.2.16")
 
-  // CVE-2022-2048 - use the bom to upgrade things we can.
-  interlokRuntime (platform("org.eclipse.jetty:jetty-bom:9.4.53.v20231009"))
+  interlokRuntime (platform("org.eclipse.jetty:jetty-bom:10.0.19"))
 
   // snakeyaml 1.30 CVE-2022-25857, CVE-2022-38749, CVE-2022-38751, CVE-2022-38752, CVE-2022-38750
   // We're end up with jackson as a transitive deps in almost all cases so this
