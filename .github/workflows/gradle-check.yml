@@ -1,6 +1,5 @@
 name: gradle-check
 run-name: Gradle Check
-
 on:
   workflow_call:
     inputs:
@@ -29,8 +28,7 @@ on:
         required: false
         description: "Gradle version to use"
         type: string
-        default: "8.4"
-
+        default: 8.5
 jobs:
   bootstrap:
     name: Pipeline Bootstrap
@@ -73,7 +71,6 @@ jobs:
           else
             echo "is_dependabot_pr=false"  >> "$GITHUB_OUTPUT"
           fi
-
   gradle:
     runs-on: ubuntu-latest
     needs:
@@ -125,7 +122,6 @@ jobs:
           sha: ${{ inputs.sha }}
           context: ${{ needs.bootstrap.outputs.status_context }}
           label_prefix: ${{ needs.bootstrap.outputs.label_prefix }}
-
   dependabot_merge_gradle:
     runs-on: ubuntu-latest
     name: Dependabot Merge (gradle changes)
@@ -186,7 +182,6 @@ jobs:
         run: |
           gh pr review --approve "${{ inputs.pull_request }}"
           gh pr merge -r --auto "${{ inputs.pull_request }}"
-
   dependabot_merge_actions:
     runs-on: ubuntu-latest
     name: Dependabot Merge (action changes)
