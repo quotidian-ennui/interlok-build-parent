@@ -1,5 +1,4 @@
 name: owasp
-
 on:
   push:
     branches:
@@ -17,16 +16,12 @@ on:
       - "verifyLog4j2.xml"
   schedule:
     - cron: "15 03 * * SUN"
-
 env:
-  GRADLE_VERSION: 8.4
-
+  GRADLE_VERSION: 8.5
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
-
 permissions: {}
-
 jobs:
   owasp:
     name: OWASP Dependency Check Analyze
