@@ -1,0 +1,71 @@
+# {{ $githubPullRequestAction := eq (env "UPDATECLI_GH_ACTION" | default "true") "true" }}
+name: 'updatecli'
+
+# {{ if $githubPullRequestAction }}
+actions:
+  pull_request:
+    scmid: github
+    title: 'chore(deps): Bump gradle version to {{ source "latest" }}'
+    kind: github/pullrequest
+    mergemethod: "squash"
+    spec:
+      labels:
+        - dependencies
+
+scms:
+  github:
+    disabled: false
+    kind: github
+    spec:
+      branch: main
+      owner: quotidian-ennui
+      repository: interlok-build-parent
+      user: '{{ requiredEnv "UPDATECLI_GITHUB_USER" }}'
+      email: '{{ requiredEnv "UPDATECLI_GITHUB_EMAIL" }}'
+      username: '{{ requiredEnv "UPDATECLI_GITHUB_USER" }}'
+      token: '{{ requiredEnv "UPDATECLI_GITHUB_TOKEN" }}'
+      commitmessage:
+        type: "chore"
+        scope: "deps"
+        title: 'Bump gradle version to {{ source "latest" }}'
+        hidecredit: true
+# {{ end }}
+
+sources:
+  latest:
+    name: Github release for gradle
+    kind: githubrelease
+    spec:
+      owner: gradle
+      repository: gradle
+      token: '{{ requiredEnv "GITHUB_TOKEN" }}'
+      versionfilter:
+        kind: semver
+    transformers:
+      - trimprefix: 'v'
+      - trimsuffix: '.0'
+
+targets:
+  update_gradle_check:
+    kind: yaml
+    sourceid: latest
+    name: 'Bump gradle version'
+    # {{ if $githubPullRequestAction }}
+    scmid: github
+    # {{ end }}
+    spec:
+      files:
+        - .github/workflows/gradle-check.yml
+      key: $.on.workflow_call.inputs.gradle_version.default
+
+  update_owasp:
+    kind: yaml
+    sourceid: latest
+    name: 'Bump gradle version'
+    # {{ if $githubPullRequestAction }}
+    scmid: github
+    # {{ end }}
+    spec:
+      files:
+        - .github/workflows/owasp.yml
+      key: $.env.GRADLE_VERSION
