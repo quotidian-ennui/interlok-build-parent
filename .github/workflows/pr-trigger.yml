@@ -19,7 +19,7 @@ jobs:
     name: Dependabot Workflow Trigger
     steps:
     - name: Find associated PR
-      uses: jwalton/gh-find-current-pr@v1
+      uses: jwalton/gh-find-current-pr@v1.3.2
       id: findpr
       with:
         github-token: ${{ github.token }}
@@ -29,10 +29,10 @@ jobs:
       if: ${{ github.actor == 'dependabot[bot]' }}
       id: depbot-metadata
       continue-on-error: true
-      uses: dependabot/fetch-metadata@v1
+      uses: dependabot/fetch-metadata@v1.6.0
     - name: dispatch
       id: dispatch
-      uses: quotidian-ennui/actions-olio/repo-dispatch@main
+      uses: quotidian-ennui/actions-olio/repo-dispatch@v0.1.0
       with:
         event_type: pr-build
         token: ${{ secrets.GITHUB_TOKEN }}

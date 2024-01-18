@@ -78,7 +78,7 @@ jobs:
     name: Gradle Check
     steps:
       - name: Build Pending
-        uses: quotidian-ennui/actions-olio/commit-status-and-label@376801a8682f63c943378e72e1fa752400709bf1 # main
+        uses: quotidian-ennui/actions-olio/commit-status-and-label@v0.1.0
         if: |
           needs.bootstrap.outputs.is_pr == 'true' &&
           inputs.sha != ''
@@ -116,7 +116,7 @@ jobs:
           (success() || failure()) &&
           needs.bootstrap.outputs.is_pr == 'true' &&
           inputs.sha != ''
-        uses: quotidian-ennui/actions-olio/commit-status-and-label@376801a8682f63c943378e72e1fa752400709bf1 # main
+        uses: quotidian-ennui/actions-olio/commit-status-and-label@v0.1.0
         with:
           state: ${{ steps.gradle.outcome }}
           sha: ${{ inputs.sha }}
@@ -155,7 +155,7 @@ jobs:
           fi
       - name: Update PR with Automerge comment
         id: comment
-        uses: quotidian-ennui/actions-olio/pr-or-issue-comment@376801a8682f63c943378e72e1fa752400709bf1 # main
+        uses: quotidian-ennui/actions-olio/pr-or-issue-comment@v0.1.0
         with:
           issue_number: ${{ inputs.pull_request }}
           body: |
@@ -215,7 +215,7 @@ jobs:
           fi
       - name: Update PR with Automerge comment
         id: comment
-        uses: quotidian-ennui/actions-olio/pr-or-issue-comment@376801a8682f63c943378e72e1fa752400709bf1 # main
+        uses: quotidian-ennui/actions-olio/pr-or-issue-comment@v0.1.0
         with:
           issue_number: ${{ inputs.pull_request }}
           body: |
