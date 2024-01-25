@@ -49,7 +49,7 @@ jobs:
       - name: Changed Files
         # Attempt to figure out what files have changed
         id: changes
-        uses: tj-actions/changed-files@ae82ed4ae04587b665efad2f206578aa6f0e8539 # v42.0.0
+        uses: tj-actions/changed-files@ac21d93904fb48e7f76ce4bd2a4d197f67e34abe # v42.0.1
         with:
           files_yaml: |
             gradle:
