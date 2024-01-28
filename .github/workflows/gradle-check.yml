@@ -34,7 +34,6 @@ jobs:
     name: Pipeline Bootstrap
     runs-on: ubuntu-latest
     outputs:
-      status_url: ${{ steps.compute.outputs.status_url }}
       status_context: "Gradle Check"
       is_pr: ${{ steps.compute.outputs.is_pr }}
       is_dependabot_pr: ${{ steps.compute.outputs.is_dependabot_pr }}
@@ -165,12 +164,11 @@ jobs:
             | ------ | ------ |
             |Automerge allowed up to| semver-patch |
             |Update Type| ${{ inputs.update_type }} |
-            |Pull Request| ${{ inputs.pull_request }} |
             |is_dependabot| ${{ needs.bootstrap.outputs.is_dependabot_pr }} |
             |gradle changes| ${{ needs.bootstrap.outputs.gradle_modified }} |
             |action changes| ${{ needs.bootstrap.outputs.actions_modified }} |
           token: ${{ secrets.GITHUB_TOKEN }}
-          search_term: "dependabot-action-automerge-status"
+          search_term: "dependabot-gradle-automerge-status"
       - name: Dependabot Merge
         id: try_merge
         continue-on-error: true
@@ -225,12 +223,11 @@ jobs:
             | ------ | ------ |
             |Automerge allowed up to| semver-minor |
             |Update Type| ${{ inputs.update_type }} |
-            |Pull Request| ${{ inputs.pull_request }} |
             |is_dependabot| ${{ needs.bootstrap.outputs.is_dependabot_pr }} |
             |gradle changes| ${{ needs.bootstrap.outputs.gradle_modified }} |
             |action changes| ${{ needs.bootstrap.outputs.actions_modified }} |
           token: ${{ secrets.GITHUB_TOKEN }}
-          search_term: "dependabot-gradle-automerge-status"
+          search_term: "dependabot-action-automerge-status"
       - name: Dependabot Merge
         continue-on-error: true
         if: |
@@ -240,4 +237,4 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh pr review --approve "${{ inputs.pull_request }}"
-          gh pr merge -r --auto "${{ inputs.pull_request }}"
+          gh pr merge -r "${{ inputs.pull_request }}"
