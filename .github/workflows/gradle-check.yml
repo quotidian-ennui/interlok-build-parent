@@ -77,7 +77,7 @@ jobs:
     name: Gradle Check
     steps:
       - name: Build Pending
-        uses: quotidian-ennui/actions-olio/commit-status-and-label@v0.1.0
+        uses: quotidian-ennui/actions-olio/commit-status-and-label@main
         if: |
           needs.bootstrap.outputs.is_pr == 'true' &&
           inputs.sha != ''
@@ -115,7 +115,7 @@ jobs:
           (success() || failure()) &&
           needs.bootstrap.outputs.is_pr == 'true' &&
           inputs.sha != ''
-        uses: quotidian-ennui/actions-olio/commit-status-and-label@v0.1.0
+        uses: quotidian-ennui/actions-olio/commit-status-and-label@main
         with:
           state: ${{ steps.gradle.outcome }}
           sha: ${{ inputs.sha }}
@@ -154,7 +154,7 @@ jobs:
           fi
       - name: Update PR with Automerge comment
         id: comment
-        uses: quotidian-ennui/actions-olio/pr-or-issue-comment@v0.1.0
+        uses: quotidian-ennui/actions-olio/pr-or-issue-comment@main
         with:
           issue_number: ${{ inputs.pull_request }}
           body: |
@@ -179,7 +179,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh pr review --approve "${{ inputs.pull_request }}"
-          gh pr merge -r --auto "${{ inputs.pull_request }}"
+          gh pr merge -s "${{ inputs.pull_request }}"
   dependabot_merge_actions:
     runs-on: ubuntu-latest
     name: Dependabot Merge (action changes)
@@ -213,7 +213,7 @@ jobs:
           fi
       - name: Update PR with Automerge comment
         id: comment
-        uses: quotidian-ennui/actions-olio/pr-or-issue-comment@v0.1.0
+        uses: quotidian-ennui/actions-olio/pr-or-issue-comment@main
         with:
           issue_number: ${{ inputs.pull_request }}
           body: |
@@ -237,4 +237,4 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh pr review --approve "${{ inputs.pull_request }}"
-          gh pr merge -r "${{ inputs.pull_request }}"
+          gh pr merge -s "${{ inputs.pull_request }}"

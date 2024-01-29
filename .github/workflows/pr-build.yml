@@ -1,9 +1,9 @@
 name: dependabot-build
-run-name: Build PR (${{ github.event.client_payload.detail.pull_request }})
+run-name: Assess PR (${{ github.event.client_payload.detail.pull_request }})
 on:
   repository_dispatch:
     types:
-      - pr-build
+      - pr-trigger
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.client_payload.base.ref }}

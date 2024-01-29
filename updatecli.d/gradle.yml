@@ -1,7 +1,7 @@
-# {{ $githubPullRequestAction := eq (env "UPDATECLI_GH_ACTION" | default "true") "true" }}
+# {{ $scmEnabled := and (env "GITHUB_REPOSITORY_OWNER") (env "GITHUB_REPOSITORY_NAME") }}
 name: 'updatecli'
 
-# {{ if $githubPullRequestAction }}
+# {{ if $scmEnabled }}
 actions:
   pull_request:
     scmid: github
@@ -18,8 +18,8 @@ scms:
     kind: github
     spec:
       branch: main
-      owner: quotidian-ennui
-      repository: interlok-build-parent
+      owner: '{{ requiredEnv "GITHUB_REPOSITORY_OWNER" }}'
+      repository: '{{ requiredEnv "GITHUB_REPOSITORY_NAME" }}'
       user: '{{ requiredEnv "UPDATECLI_GITHUB_USER" }}'
       email: '{{ requiredEnv "UPDATECLI_GITHUB_EMAIL" }}'
       username: '{{ requiredEnv "UPDATECLI_GITHUB_USER" }}'
@@ -50,7 +50,7 @@ targets:
     kind: yaml
     sourceid: latest
     name: 'Bump gradle version'
-    # {{ if $githubPullRequestAction }}
+    # {{ if $scmEnabled }}
     scmid: github
     # {{ end }}
     spec:
@@ -62,7 +62,7 @@ targets:
     kind: yaml
     sourceid: latest
     name: 'Bump gradle version'
-    # {{ if $githubPullRequestAction }}
+    # {{ if $scmEnabled }}
     scmid: github
     # {{ end }}
     spec:

@@ -65,7 +65,7 @@ jobs:
           build-root-directory: test
       - name: Update PR
         id: comment
-        uses: quotidian-ennui/actions-olio/pr-or-issue-comment@v0.1.0
+        uses: quotidian-ennui/actions-olio/pr-or-issue-comment@main
         if: |
           (success() || failure()) &&
           github.event_name == 'pull_request' &&
