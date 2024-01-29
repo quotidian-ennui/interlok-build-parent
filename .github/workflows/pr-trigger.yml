@@ -19,7 +19,7 @@ jobs:
     name: Dependabot Workflow Trigger
     steps:
     - name: Find associated PR
-      uses: jwalton/gh-find-current-pr@v1.3.2
+      uses: jwalton/gh-find-current-pr@v1.3.3
       id: findpr
       with:
         github-token: ${{ github.token }}
