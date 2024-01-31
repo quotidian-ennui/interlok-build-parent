@@ -42,8 +42,9 @@ jobs:
         run: |
           echo "today=$(/bin/date -u '+%Y%m%d')" >> "$GITHUB_OUTPUT"
       - name: Setup Gradle
-        uses: gradle/gradle-build-action@a8f75513eafdebd8141bd1cd4e30fcd194af8dfa # v2.12.0
+        uses: gradle/actions/setup-gradle@ec92e829475ac0c2315ea8f9eced72db85bb337a # v3.0.0
         with:
+          gradle-home-cache-cleanup: true
           gradle-version: ${{ env.GRADLE_VERSION }}
           gradle-home-cache-excludes: dependency-check-data
       - name: OWASP dependency-check-data cache
@@ -54,15 +55,12 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-dependency-check-data-
       - name: Gradle DependencyCheckAnalyze
-        uses: gradle/gradle-build-action@a8f75513eafdebd8141bd1cd4e30fcd194af8dfa # v2.12.0
         id: owasp
         env:
           JAVA_TOOL_OPTIONS: -Dpolyglot.js.nashorn-compat=true -Dpolyglot.engine.WarnInterpreterOnly=false
           NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
-        with:
-          gradle-version: ${{ env.GRADLE_VERSION }}
-          arguments: dependencyCheckAnalyze
-          build-root-directory: test
+        run: |
+          cd "${{ github.workspace }}/test" && gradle dependencyCheckAnalyze
       - name: Update PR
         id: comment
         uses: quotidian-ennui/actions-olio/pr-or-issue-comment@main
