@@ -24,3 +24,52 @@ jobs:
       pull_request: ${{ github.event.client_payload.detail.pull_request }}
       update_type: ${{ github.event.client_payload.detail.dependabot_update_type }}
       actor: ${{ github.event.client_payload.base.actor }}
+
+  dependabot_merge_gradle:
+    runs-on: ubuntu-latest
+    name: Dependabot Merge (gradle changes)
+    needs:
+      - build
+    if: |
+      github.event.client_payload.detail.pull_request != ''
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        with:
+          ref: ${{ github.event.client_payload.base.ref }}
+      - name: Dependabot Merge
+        id: dependabot_merge
+        uses: quotidian-ennui/actions-olio/dependabot-merge@main
+        with:
+          # contents:write token will do here.
+          # token: ${{ steps.app-token.outputs.token }}
+          change_filter: "**/build.gradle"
+          automerge_level: "semver-patch"
+
+  dependabot_merge_actions:
+    runs-on: ubuntu-latest
+    name: Dependabot Merge (action changes)
+    needs:
+      - build
+    if: |
+      github.event.client_payload.detail.pull_request != ''
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        with:
+          ref: ${{ github.event.client_payload.base.ref }}
+      - name: "Create Token"
+        uses: actions/create-github-app-token@86576b355dd19da0519e0bdb63d8edb5bcf76a25 # v1.7.0
+        id: app-token
+        with:
+          app-id: ${{ vars.WORKFLOW_UPDATE_APP_ID }}
+          private-key: ${{ secrets.WORKFLOW_UPDATE_KEY }}
+          owner: ${{ github.repository_owner }}
+      - name: Dependabot Merge
+        id: dependabot_merge
+        uses: quotidian-ennui/actions-olio/dependabot-merge@main
+        with:
+          # special token because modifying workflows
+          token: ${{ steps.app-token.outputs.token }}
+          change_filter: ".github/workflows/**"
+          automerge_level: "semver-patch|semver-minor"
