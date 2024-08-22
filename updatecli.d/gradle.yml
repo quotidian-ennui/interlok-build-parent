@@ -1,5 +1,5 @@
 # {{ $scmEnabled := and (env "GITHUB_REPOSITORY_OWNER") (env "GITHUB_REPOSITORY_NAME") }}
-name: 'updatecli'
+name: "updatecli"
 
 # {{ if $scmEnabled }}
 actions:
@@ -7,7 +7,6 @@ actions:
     scmid: github
     title: 'chore(deps): Bump gradle version to {{ source "latest" }}'
     kind: github/pullrequest
-    mergemethod: "squash"
     spec:
       labels:
         - dependencies
@@ -42,14 +41,14 @@ sources:
       versionfilter:
         kind: semver
     transformers:
-      - trimprefix: 'v'
-      - trimsuffix: '.0'
+      - trimprefix: "v"
+      - trimsuffix: ".0"
 
 targets:
   update_gradle_check:
     kind: yaml
     sourceid: latest
-    name: 'Bump gradle version'
+    name: "Bump gradle version"
     # {{ if $scmEnabled }}
     scmid: github
     # {{ end }}
@@ -57,11 +56,12 @@ targets:
       files:
         - .github/workflows/gradle-check.yml
       key: $.on.workflow_call.inputs.gradle_version.default
+      value: '"{{ source "latest" }}"'
 
   update_owasp:
     kind: yaml
     sourceid: latest
-    name: 'Bump gradle version'
+    name: "Bump gradle version"
     # {{ if $scmEnabled }}
     scmid: github
     # {{ end }}
@@ -69,3 +69,4 @@ targets:
       files:
         - .github/workflows/owasp.yml
       key: $.env.GRADLE_VERSION
+      value: '"{{ source "latest" }}"'
