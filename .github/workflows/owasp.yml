@@ -17,7 +17,7 @@ on:
   schedule:
     - cron: "15 03 * * SUN"
 env:
-  GRADLE_VERSION: "8.10.1"
+  GRADLE_VERSION: "8.10.2"
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
