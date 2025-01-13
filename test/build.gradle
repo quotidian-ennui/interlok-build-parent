@@ -20,7 +20,7 @@ allprojects {
 
 dependencies {
   interlokRuntime ("com.adaptris:interlok-json:$interlokVersion")
-  interlokRuntime ("org.json:json:20241224")
+  interlokRuntime ("org.json:json:20250107")
   interlokRuntime ("net.minidev:json-smart:2.5.1")
 }
 // works around an issue with dependency-check-gradle:8.0.1 where groovy
