@@ -254,7 +254,7 @@ configurations.all {
 
     substitute module('javax.validation:validation-api') using module('jakarta.validation:jakarta.validation-api:2.0.2')
     // switch to mwiede:jsch branch (should still be optimistically upgraded)
-    substitute module('com.jcraft:jsch') using module('com.github.mwiede:jsch:0.2.22')
+    substitute module('com.jcraft:jsch') using module('com.github.mwiede:jsch:0.2.23')
 
     // Redirect a bunch of javamail stuffs as well. This is the list from mvnrepository.com
     substitute module('com.sun.mail:javax.mail') using module("$jakartaMailSubstitution")
@@ -334,7 +334,7 @@ dependencies {
   interlokRuntime ("jakarta.validation:jakarta.validation-api:2.0.2")
   interlokRuntime ('com.sun.activation:jakarta.activation:1.2.2')
   interlokRuntime ('jakarta.management.j2ee:jakarta.management.j2ee-api:1.1.4')
-  interlokRuntime ("com.github.mwiede:jsch:0.2.22")
+  interlokRuntime ("com.github.mwiede:jsch:0.2.23")
 
   interlokRuntime (platform("org.eclipse.jetty:jetty-bom:10.0.19"))
 
