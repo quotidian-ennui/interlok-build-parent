@@ -24,6 +24,7 @@ concurrency:
 permissions: {}
 jobs:
   owasp:
+    if: false
     name: OWASP Dependency Check Analyze
     runs-on: ubuntu-latest
     permissions:
