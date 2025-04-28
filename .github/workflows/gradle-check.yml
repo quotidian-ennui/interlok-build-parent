@@ -38,7 +38,7 @@ on:
         required: false
         description: "Gradle version to use"
         type: string
-        default: "8.13"
+        default: "8.14"
 jobs:
   gradle:
     runs-on: ubuntu-latest
