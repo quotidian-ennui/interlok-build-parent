@@ -56,7 +56,6 @@ targets:
       files:
         - .github/workflows/gradle-check.yml
       key: $.on.workflow_call.inputs.gradle_version.default
-      value: '"{{ source "latest" }}"'
 
   update_owasp:
     kind: yaml
@@ -69,4 +68,3 @@ targets:
       files:
         - .github/workflows/owasp.yml
       key: $.env.GRADLE_VERSION
-      value: '"{{ source "latest" }}"'
